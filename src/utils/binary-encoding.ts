@@ -10,7 +10,7 @@ export function encodeTransaction(transaction: Transaction): Buffer {
   // Agregar el ID de la transacción
   writeString(transaction.id, buffers);
   
-  //Agregar el timestamp de la transaccion en 8 bytes
+  //Agregar el timestamp en 8 bytes
   const timeStamp = Buffer.alloc(8);
   timeStamp.writeBigUInt64BE(BigInt(transaction.timestamp));
   buffers.push(timeStamp);
@@ -20,7 +20,7 @@ export function encodeTransaction(transaction: Transaction): Buffer {
   inputsAmount.writeUInt8(transaction.inputs.length);
   buffers.push(inputsAmount);
 
-  // Agregar datos del input: utxoId, outputIndex, owner y signature
+  // Agregar datos de los inputs: utxoId, outputIndex, owner y signature
   for (const input of transaction.inputs) {
     writeString(input.utxoId.txId, buffers);
     const outputIndexBuffer = Buffer.alloc(4);
@@ -35,7 +35,7 @@ export function encodeTransaction(transaction: Transaction): Buffer {
   outputsAmount.writeUInt8(transaction.outputs.length);
   buffers.push(outputsAmount);
 
-  // Agregar datos del output: amount y recipient
+  // Agregar datos de los outputs: amount y recipient
   for (const output of transaction.outputs) {
     const outputAmountBuffer = Buffer.alloc(8);
     outputAmountBuffer.writeBigUInt64BE(BigInt(output.amount));
@@ -66,7 +66,7 @@ function writeString(string: string, buffers: Buffer[]) {
 export function decodeTransaction(buffer: Buffer): Transaction {
   let readPosition = 0;
   
-  //Leer ID de la transaccion 
+  //Leer Id de la transaccion 
   let id: string;
   [id, readPosition] = readString(buffer, readPosition);
   
@@ -91,11 +91,11 @@ export function decodeTransaction(buffer: Buffer): Transaction {
     inputs.push({ utxoId: { txId, outputIndex }, owner, signature });
   }
  
-    // Obtener cantidad de outputs de la transaccion
+  // Obtener cantidad de outputs de la transaccion
   const outputsAmount = buffer.readUInt8(readPosition++);
   const outputs: TransactionOutput[] = [];
 
-  // Leer datos del output: amount y recipient
+  // Leer datos de cada output: amount y recipient
   for (let i = 0; i < outputsAmount; i++) {
     const amount = Number(buffer.readBigUInt64BE(readPosition));
     readPosition += 8;
@@ -110,7 +110,7 @@ export function decodeTransaction(buffer: Buffer): Transaction {
 
 // Funcion para leer del buffer un string con su longitud
 function readString(buffer: Buffer, offset: number): [string, number] {
-  // Obtener el tamano del string 
+  // Obtener el tamaño del string 
   const stringLength = buffer.readUInt16BE(offset);
   offset += 2;
   // Extraer los bytes del string y convertir a UTF-8
